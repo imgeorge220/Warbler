@@ -33,6 +33,19 @@
             </div>
             <p class="single-message">{{ message.text }}</p>
             <span class="text-muted">{{ message.timestamp.strftime('%d %B %Y') }}</span>
+            <form action="/messages/{{ message.id }}/fancy" method="POST">
+              <input type="hidden" name="previous-page" value="/messages/{{ message.id }}">
+              <button type="submit" class="btn btn-link">
+                <span class="fa-stack fa-2x">
+                  {% if message.is_fancied_by(g.user) %}
+                  <i class="fas fa-star fa-stack-1x" style="color:coral;font-size:3rem"></i>
+                  {% else %}
+                  <i class="fas fa-star fa-stack-1x" style="color:grey;font-size:3rem"></i>
+                  {% endif %}
+                  <i class="fa-stack-1x" style="font-size:0.7rem;color:white">{{ message.count_fancies() }}</i>
+                </span>
+              </button>
+            </form>
           </div>
         </li>
       </ul>

@@ -3,10 +3,9 @@ import os
 from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import or_
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
-from models import db, connect_db, User, Message, HEADER_DEFAULT, PROFILE_DEFAULT
+from models import db, connect_db, User, Message, Fancy, HEADER_DEFAULT, PROFILE_DEFAULT
 
 CURR_USER_KEY = "curr_user"
 
@@ -304,6 +303,26 @@ def messages_destroy(message_id):
 
     return redirect(f"/users/{g.user.id}")
 
+@app.route('/messages/<int:message_id>/fancy', methods=["POST"])
+def messages_fancy(message_id):
+    """"""
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
+    prev_page = request.form.get("previous-page", "/")
+    message = Message.query.get_or_404(message_id)
+
+    if message.is_fancied_by(g.user):
+        Fancy.query.filter_by(user_id=g.user.id, message_id=message_id).delete()
+    else:
+        new_fancy = Fancy(user_id=g.user.id, message_id=message_id)
+        db.session.add(new_fancy)
+
+    db.session.commit()
+
+    return redirect(prev_page)
+
 
 ##############################################################################
 # Homepage and error pages
@@ -318,11 +337,11 @@ def homepage():
     """
 
     if g.user:
-        following_users_ids = [user.id for user in g.user.following]
+        following_users_ids = [user.id for user in g.user.following] + [g.user.id]
+
         messages = (Message
                     .query
-                    .filter(or_(Message.user_id.in_(following_users_ids),
-                                Message.user_id == g.user.id))
+                    .filter(Message.user_id.in_(following_users_ids))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())

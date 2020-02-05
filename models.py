@@ -181,6 +181,34 @@ class Message(db.Model):
 
     user = db.relationship('User')
 
+    fanciers = db.relationship("User",
+                              secondary="fancies",
+                              backref="fancies")
+
+    def count_fancies(self):
+        return len(self.fanciers)
+
+    def is_fancied_by(self, user):
+        return user in self.fanciers
+
+
+class Fancy(db.Model):
+    """Fancy that!"""
+
+    __tablename__ = "fancies"
+
+    message_id = db.Column(
+        db.Integer,
+        db.ForeignKey('messages.id', ondelete="cascade"),
+        primary_key=True,
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete="cascade"),
+        primary_key=True,
+    )
+
 
 def connect_db(app):
     """Connect this database to provided Flask app.
