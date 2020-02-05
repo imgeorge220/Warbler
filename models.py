@@ -74,6 +74,8 @@ class User(db.Model):
 
     messages = db.relationship('Message')
 
+    # primaryjoin = current instance (xuser.followers -> primaryjoin matches xuser's id)
+    # this is confusing
     followers = db.relationship(
         "User",
         secondary="follows",
@@ -110,6 +112,7 @@ class User(db.Model):
         Hashes password and adds user to system.
         """
 
+        # we need to make sure the user doesn't exist
         hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
 
         user = User(
@@ -135,6 +138,7 @@ class User(db.Model):
 
         user = cls.query.filter_by(username=username).first()
 
+        # can add flash here to indicate what went wrong
         if user:
             is_auth = bcrypt.check_password_hash(user.password, password)
             if is_auth:

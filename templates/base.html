@@ -52,6 +52,8 @@
     </ul>
   </div>
 </nav>
+<!-- category is a bootstrap alert category (e.g. success, warning, danger)
+flash(msg, category) -->
 <div class="container">
   {% for category, message in get_flashed_messages(with_categories=True) %}
   <div class="alert alert-{{ category }}">{{ message }}</div>
