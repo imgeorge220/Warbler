@@ -8,6 +8,9 @@ from flask_sqlalchemy import SQLAlchemy
 bcrypt = Bcrypt()
 db = SQLAlchemy()
 
+HEADER_DEFAULT = "/static/images/warbler-hero.jpg"
+PROFILE_DEFAULT = "/static/images/default-pic.png"
+
 
 class Follows(db.Model):
     """Connection of a follower <-> followed_user."""
@@ -51,12 +54,12 @@ class User(db.Model):
 
     image_url = db.Column(
         db.Text,
-        default="/static/images/default-pic.png",
+        default=PROFILE_DEFAULT
     )
 
     header_image_url = db.Column(
         db.Text,
-        default="/static/images/warbler-hero.jpg"
+        default=HEADER_DEFAULT
     )
 
     bio = db.Column(
@@ -74,8 +77,6 @@ class User(db.Model):
 
     messages = db.relationship('Message')
 
-    # primaryjoin = current instance (xuser.followers -> primaryjoin matches xuser's id)
-    # this is confusing
     followers = db.relationship(
         "User",
         secondary="follows",
@@ -112,7 +113,6 @@ class User(db.Model):
         Hashes password and adds user to system.
         """
 
-        # we need to make sure the user doesn't exist
         hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
 
         user = User(
@@ -138,13 +138,18 @@ class User(db.Model):
 
         user = cls.query.filter_by(username=username).first()
 
-        # can add flash here to indicate what went wrong
         if user:
             is_auth = bcrypt.check_password_hash(user.password, password)
             if is_auth:
                 return user
 
         return False
+
+    def check_password(self, password):
+        """Checks if the password arguement is correct for the User instance"""
+
+        is_user = bcrypt.check_password_hash(self.password, password)
+        return is_user
 
 
 class Message(db.Model):
