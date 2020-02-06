@@ -17,6 +17,8 @@ class Follows(db.Model):
 
     __tablename__ = 'follows'
 
+    __table_args__ = (db.CheckConstraint("user_being_followed_id <> user_following_id"), )
+
     user_being_followed_id = db.Column(
         db.Integer,
         db.ForeignKey('users.id', ondelete="cascade"),
@@ -29,6 +31,9 @@ class Follows(db.Model):
         primary_key=True,
     )
 
+    def __repr__(self):
+        return f"<Follow: Followed: {self.user_being_followed_id},  Following: {self.user_following_id}"
+
 
 class User(db.Model):
     """User in the system."""
@@ -37,6 +42,7 @@ class User(db.Model):
 
     id = db.Column(
         db.Integer,
+        autoincrement=True,
         primary_key=True,
     )
 
@@ -101,13 +107,18 @@ class User(db.Model):
         return len(found_user_list) == 1
 
     def is_following(self, other_user):
-        """Is this user following `other_use`?"""
+        """Is this user following `other_user`?"""
 
         found_user_list = [user for user in self.following if user == other_user]
         return len(found_user_list) == 1
 
+    def count_fancies(self):
+        """How many messages has the user fancied"""
+
+        return len(self.fancies)
+
     @classmethod
-    def signup(cls, username, email, password, image_url):
+    def signup(cls, username, email, password, image_url=None):
         """Sign up user.
 
         Hashes password and adds user to system.
@@ -159,6 +170,7 @@ class Message(db.Model):
 
     id = db.Column(
         db.Integer,
+        autoincrement=True,
         primary_key=True,
     )
 
@@ -184,6 +196,9 @@ class Message(db.Model):
     fanciers = db.relationship("User",
                               secondary="fancies",
                               backref="fancies")
+
+    def __repr__(self):
+        return f"<Message - User: {self.user} - {self.text}>"
 
     def count_fancies(self):
         return len(self.fanciers)
