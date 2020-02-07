@@ -2,8 +2,8 @@
 
 {% block content %}
 
-<div id="warbler-hero" >
-  <img src="{{ user.header_image_url }}" alt="Header for {{ user.username }}" class="img-fluid" id="profile-header">
+<div id="warbler-hero" class="row">
+  <img src="{{ user.header_image_url }}" alt="Header for {{ user.username }}" class="img-fluid col" id="profile-header">
 </div>
 <img src="{{ user.image_url }}" alt="Image for {{ user.username }}" id="profile-avatar">
 <div class="row full-width">
