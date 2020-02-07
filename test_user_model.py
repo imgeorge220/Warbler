@@ -10,6 +10,7 @@ from unittest import TestCase
 
 from models import db, User, Message, Follows, Fancy
 
+
 # BEFORE we import our app, let's set an environmental variable
 # to use a different database for tests (we need to do this
 # before we import our app, since that will have already
@@ -105,12 +106,27 @@ class UserModelTestCase(TestCase):
 
         db.session.commit()
 
-        #
+        # user created by signup method
         self.assertEqual(len(User.query.all()), 1)
+
+        # can log in with correct password
         self.assertTrue(User.authenticate("username", "password1"))
         self.assertTrue(u1.check_password("password1"))
+
+        # can't log in with wrong password
         self.assertFalse(User.authenticate("username", "password2"))
         self.assertFalse(u1.check_password("password2"))
-        with self.assertRaises(Exception):
+
+        # can't log in with bogus username
+        self.assertFalse(User.authenticate("nonexistent", "random"))
+
+        # throws an error if the username or e-mail already exists
+        with self.assertRaises(sqlalchemy.exc.IntegrityError) as exception:
             User.signup("username", "email2@test.gov","password2")
             db.session.commit()
+        print(exception.exception)
+
+        with self.assertRaises(Exception) as exception:
+            User.signup("username-different", "email@test.gov","password3")
+            db.session.commit()
+        print(exception.exception)

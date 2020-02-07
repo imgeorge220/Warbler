@@ -307,28 +307,32 @@ def messages_show(message_id):
 def messages_destroy(message_id):
     """Delete a message."""
 
-    if not g.user:
+    msg = Message.query.get(message_id)
+
+    if not g.user or g.user.id != msg.user_id:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    msg = Message.query.get(message_id)
     db.session.delete(msg)
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}")
 
+
 @app.route('/messages/<int:message_id>/fancy', methods=["POST"])
 def messages_fancy(message_id):
-    """"""
+    """Fancy or unfancy a message"""
+
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
-    
+
     prev_page = request.form.get("previous-page", "/")
     message = Message.query.get_or_404(message_id)
 
     if message.is_fancied_by(g.user):
-        Fancy.query.filter_by(user_id=g.user.id, message_id=message_id).delete()
+        Fancy.query.filter_by(
+            user_id=g.user.id, message_id=message_id).delete()
     else:
         new_fancy = Fancy(user_id=g.user.id, message_id=message_id)
         db.session.add(new_fancy)
@@ -351,7 +355,8 @@ def homepage():
     """
 
     if g.user:
-        following_users_ids = [user.id for user in g.user.following] + [g.user.id]
+        following_users_ids = [
+            user.id for user in g.user.following] + [g.user.id]
 
         messages = (Message
                     .query
