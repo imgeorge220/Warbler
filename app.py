@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
 from models import db, connect_db, User, Message, Fancy, HEADER_DEFAULT, PROFILE_DEFAULT
+from verification import verify_user
 
 CURR_USER_KEY = "curr_user"
 
@@ -156,36 +157,27 @@ def users_show(user_id):
 
 
 @app.route('/users/<int:user_id>/following')
+@verify_user
 def show_following(user_id):
     """Show list of people this user is following."""
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
 
     user = User.query.get_or_404(user_id)
     return render_template('users/following.html', user=user)
 
 
 @app.route('/users/<int:user_id>/followers')
+@verify_user
 def users_followers(user_id):
     """Show list of followers of this user."""
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
 
     user = User.query.get_or_404(user_id)
     return render_template('users/followers.html', user=user)
 
 
 @app.route('/users/<int:user_id>/fancies')
+@verify_user
 def users_fancies(user_id):
     """Show list of warbles fancied by user."""
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
 
     user = User.query.get_or_404(user_id)
     messages = user.fancies
@@ -194,12 +186,9 @@ def users_fancies(user_id):
 
 
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
+@verify_user
 def add_follow(follow_id):
     """Add a follow for the currently-logged-in user."""
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
 
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.append(followed_user)
@@ -209,12 +198,9 @@ def add_follow(follow_id):
 
 
 @app.route('/users/stop-following/<int:follow_id>', methods=['POST'])
+@verify_user
 def stop_following(follow_id):
     """Have currently-logged-in-user stop following this user."""
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
 
     followed_user = User.query.get(follow_id)
     g.user.following.remove(followed_user)
@@ -224,12 +210,9 @@ def stop_following(follow_id):
 
 
 @app.route('/users/profile', methods=["GET", "POST"])
+@verify_user
 def profile():
     """Update profile for current user."""
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
 
     form = UserEditForm(obj=g.user)
 
@@ -254,12 +237,9 @@ def profile():
 
 
 @app.route('/users/delete', methods=["POST"])
+@verify_user
 def delete_user():
     """Delete user."""
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
 
     do_logout()
 
@@ -273,15 +253,12 @@ def delete_user():
 # Messages routes:
 
 @app.route('/messages/new', methods=["GET", "POST"])
+@verify_user
 def messages_add():
     """Add a message:
 
     Show form if GET. If valid, update message and redirect to user page.
     """
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
 
     form = MessageForm()
 
@@ -304,12 +281,13 @@ def messages_show(message_id):
 
 
 @app.route('/messages/<int:message_id>/delete', methods=["POST"])
+@verify_user
 def messages_destroy(message_id):
     """Delete a message."""
 
     msg = Message.query.get(message_id)
 
-    if not g.user or g.user.id != msg.user_id:
+    if g.user.id != msg.user_id:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
@@ -320,12 +298,9 @@ def messages_destroy(message_id):
 
 
 @app.route('/messages/<int:message_id>/fancy', methods=["POST"])
+@verify_user
 def messages_fancy(message_id):
     """Fancy or unfancy a message"""
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
 
     prev_page = request.form.get("previous-page", "/")
     message = Message.query.get_or_404(message_id)
