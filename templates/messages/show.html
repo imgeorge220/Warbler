@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
+{% from 'macros.html' import msg_fn %}
 
 {% block content %}
 
   <div class="bg"></div>
   <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-12 col-lg-10">
       <ul class="list-group no-hover" id="messages">
-        <li class="list-group-item">
+        {{ msg_fn(message, message.user, True) }}
+        <!-- <li class="list-group-item">
           <a href="{{ url_for('users_show', user_id=message.user.id) }}">
             <img src="{{ message.user.image_url }}" alt="" class="timeline-image">
           </a>
@@ -47,7 +49,7 @@
               </button>
             </form>
           </div>
-        </li>
+        </li> -->
       </ul>
     </div>
   </div>

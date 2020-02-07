@@ -17,7 +17,8 @@ class Follows(db.Model):
 
     __tablename__ = 'follows'
 
-    __table_args__ = (db.CheckConstraint("user_being_followed_id <> user_following_id"), )
+    __table_args__ = (db.CheckConstraint(
+        "user_being_followed_id <> user_following_id"), )
 
     user_being_followed_id = db.Column(
         db.Integer,
@@ -103,13 +104,15 @@ class User(db.Model):
     def is_followed_by(self, other_user):
         """Is this user followed by `other_user`?"""
 
-        found_user_list = [user for user in self.followers if user == other_user]
+        found_user_list = [
+            user for user in self.followers if user == other_user]
         return len(found_user_list) == 1
 
     def is_following(self, other_user):
         """Is this user following `other_user`?"""
 
-        found_user_list = [user for user in self.following if user == other_user]
+        found_user_list = [
+            user for user in self.following if user == other_user]
         return len(found_user_list) == 1
 
     def count_fancies(self):
@@ -182,7 +185,7 @@ class Message(db.Model):
     timestamp = db.Column(
         db.DateTime,
         nullable=False,
-        default=datetime.utcnow(),
+        default=datetime.utcnow,
     )
 
     user_id = db.Column(
@@ -194,8 +197,8 @@ class Message(db.Model):
     user = db.relationship('User')
 
     fanciers = db.relationship("User",
-                              secondary="fancies",
-                              backref="fancies")
+                               secondary="fancies",
+                               backref=db.backref("fancies", order_by="Message.timestamp.desc()"))
 
     def __repr__(self):
         return f"<Message - User: {self.user} - {self.text}>"

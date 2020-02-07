@@ -292,7 +292,8 @@ nav + .container {
   word-wrap: break-word;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 991.98px) {
+  /* 991.98 because bootstrap's css says that number when doing max-width for something just under 992*/
   .full-width .user-stats .stat {
     display: none;
   }

@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+
+{% from 'macros.html' import msg_fn%}
+
 {% block content %}
 <div class="row">
 
@@ -39,7 +42,8 @@
   <div class="col-lg-6 col-md-8 col-sm-12">
     <ul class="list-group" id="messages">
       {% for msg in messages %}
-      <li class="list-group-item" id="message-{{ msg.id }}">
+      {{ msg_fn(msg, msg.user, False) }}
+      <!-- <li class="list-group-item" id="message-{{ msg.id }}">
         <a href="/messages/{{ msg.id  }}" class="message-link" />
         <a href="/users/{{ msg.user.id }}">
           <img src="{{ msg.user.image_url }}" alt="" class="timeline-image">
@@ -62,7 +66,7 @@
             </button>
           </form>
         </div>
-      </li>
+      </li> -->
       {% endfor %}
     </ul>
   </div>

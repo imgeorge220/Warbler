@@ -182,7 +182,7 @@ def users_fancies(user_id):
     user = User.query.get_or_404(user_id)
     messages = user.fancies
 
-    return render_template('users/show.html', user=user, messages=messages)
+    return render_template('users/show-fancies.html', user=user, messages=messages)
 
 
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
@@ -302,7 +302,6 @@ def messages_destroy(message_id):
 def messages_fancy(message_id):
     """Fancy or unfancy a message"""
 
-    prev_page = request.form.get("previous-page", "/")
     message = Message.query.get_or_404(message_id)
 
     if message.is_fancied_by(g.user):
@@ -314,7 +313,7 @@ def messages_fancy(message_id):
 
     db.session.commit()
 
-    return redirect(prev_page)
+    return redirect(request.referrer)
 
 
 ##############################################################################
